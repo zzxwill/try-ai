@@ -1,4 +1,4 @@
-.PHONY: install install-deps install-playwright help docker-build docker-run docker-run-visible k8s-deploy run-visible run-demo run-record docker-run-record k8s-record run-main-record run-main-with-recording run-modified-main run-recording-agent run-direct-recording run-agent-recorder
+.PHONY: install install-deps install-playwright help docker-build docker-run docker-run-visible k8s-deploy run-visible run-demo run-record docker-run-record k8s-record run-main-record run-main-with-recording run-modified-main run-recording-agent run-direct-recording run-agent-recorder check-recordings run-monkey-patch docker-run-monkey
 
 # Default target
 help:
@@ -21,6 +21,9 @@ help:
 	@echo "  make run-recording-agent - Run main_with_recording.py (recording agent)"
 	@echo "  make run-direct-recording - Run main_direct_recording.py (direct recording)"
 	@echo "  make run-agent-recorder - Run agent_recorder.py (monkey patching approach)"
+	@echo "  make check-recordings - Check for recordings"
+	@echo "  make run-monkey-patch - Run with monkey patching for single browser recording"
+	@echo "  make docker-run-monkey - Run Docker container with monkey patching recording"
 
 # Install everything
 install: install-deps install-playwright
@@ -87,6 +90,12 @@ run-agent-recorder:
 	python3 agent_recorder.py
 	@echo "Video saved to videos/ directory"
 
+# Run with monkey patching to ensure single browser with recording
+run-monkey-patch:
+	@echo "Running with monkey patching for single browser recording..."
+	python3 monkey_patch_record.py
+	@echo "Check videos directory for recordings"
+
 # Docker build
 docker-build:
 	@echo "Building Docker image..."
@@ -105,8 +114,14 @@ docker-run:
 		echo "export OPENAI_API_KEY=your_api_key"; \
 		exit 1; \
 	fi
-	@echo "Running Docker container..."
-	docker run -it --rm -e OPENAI_API_KEY="$$OPENAI_API_KEY" browser-use:latest
+	@echo "Running Docker container with Playwright recording..."
+	@mkdir -p ./videos
+	docker run -it --rm \
+		-e OPENAI_API_KEY="$$OPENAI_API_KEY" \
+		-e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+		-v $$(pwd)/videos:/app/videos \
+		browser-use:latest
+	@echo "Check the ./videos directory for recordings"
 
 # Docker run with visible browser (X11)
 docker-run-visible:
@@ -143,6 +158,24 @@ docker-run-record:
 		python record_browser.py
 	@echo "Video saved to videos/ directory"
 
+# Docker run with monkey patching
+docker-run-monkey:
+	@if [ -z "$$OPENAI_API_KEY" ]; then \
+		echo "❌ OPENAI_API_KEY environment variable is not set!"; \
+		echo "Please set it first:"; \
+		echo "export OPENAI_API_KEY=your_api_key"; \
+		exit 1; \
+	fi
+	@echo "Running Docker container with monkey patching recording..."
+	@mkdir -p ./videos
+	docker run -it --rm \
+		-e OPENAI_API_KEY="$$OPENAI_API_KEY" \
+		-e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+		-v $$(pwd)/videos:/app/videos \
+		browser-use:latest \
+		python monkey_patch_record.py
+	@echo "Check the ./videos directory for recordings"
+
 # Kubernetes deploy
 k8s-deploy:
 	@echo "Deploying to Kubernetes..."
@@ -154,6 +187,11 @@ k8s-record:
 	kubectl apply -f k8s/record-job.yaml
 	@echo "Job submitted. To check status: kubectl get jobs"
 	@echo "To get videos: kubectl cp <pod-name>:/app/videos ./k8s-videos"
+
+# Check recordings
+check-recordings:
+	@echo "Checking for recordings..."
+	python3 check_recordings.py
 
 # Clean up (optional)
 clean:
