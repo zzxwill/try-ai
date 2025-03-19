@@ -38,64 +38,6 @@ install-playwright:
 	@echo "Installing Playwright browsers..."
 	python3 -m playwright install --with-deps
 
-# Run with visible browser
-run-visible:
-	@echo "Running Playwright with visible browser..."
-	PWDEBUG=1 python3 -c "from playwright.sync_api import sync_playwright; with sync_playwright() as p: browser = p.chromium.launch(headless=False); page = browser.new_page(); page.goto('https://example.com'); input('Press Enter to close browser...')"
-
-# Run the visible browser demo
-run-demo:
-	@echo "Running the visible browser demo..."
-	python3 visible_browser.py
-
-# Run the browser recording demo
-run-record:
-	@echo "Running the browser recording demo..."
-	python3 record_browser.py
-	@echo "Video saved to videos/ directory"
-
-# Run main.py with recording wrapper
-run-main-record:
-	@echo "Running main.py with recording wrapper..."
-	python3 record_main.py
-	@echo "Video saved to videos/ directory"
-
-# Run integrated main with recording
-run-main-with-recording:
-	@echo "Running integrated main with recording..."
-	python3 main_with_recording.py
-	@echo "Video saved to videos/ directory"
-
-# Run the modified main.py with recording
-run-modified-main:
-	@echo "Running the modified main.py with recording..."
-	python3 main.py
-	@echo "Video saved to videos/ directory"
-
-# Run recording agent approach
-run-recording-agent:
-	@echo "Running with recording agent approach..."
-	python3 main_with_recording.py
-	@echo "Video saved to videos/ directory"
-
-# Run direct recording approach
-run-direct-recording:
-	@echo "Running with direct recording approach..."
-	python3 main_direct_recording.py
-	@echo "Video saved to videos/ directory"
-
-# Run agent recorder approach (monkey patching)
-run-agent-recorder:
-	@echo "Running agent recorder approach (monkey patching)..."
-	python3 agent_recorder.py
-	@echo "Video saved to videos/ directory"
-
-# Run with monkey patching to ensure single browser with recording
-run-monkey-patch:
-	@echo "Running with monkey patching for single browser recording..."
-	python3 monkey_patch_record.py
-	@echo "Check videos directory for recordings"
-
 # Docker build
 docker-build:
 	@echo "Building Docker image..."
