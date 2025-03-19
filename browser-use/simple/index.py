@@ -42,8 +42,7 @@ async def main(task: str):
         trace_path=os.path.join(base_dir, "trace"),
     )
 
-    # context = BrowserContext(browser=browser, config=config)
-    context = BrowserContext(browser=browser)
+    context = BrowserContext(browser=browser, config=config)
 
     try:
         agent = Agent(
@@ -51,7 +50,7 @@ async def main(task: str):
             llm=ChatOpenAI(model="gpt-4o"),
             browser_context=context,
             save_conversation_path=os.path.join(base_dir, "conversation"),
-            # generate_gif=os.path.join(base_dir, "screenshots.gif"),
+            generate_gif=os.path.join(base_dir, "screenshots.gif"),
         )
 
         print("Agent initialized, starting execution...")
