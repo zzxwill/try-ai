@@ -1,20 +1,14 @@
 # Use Microsoft's Python base image with stable Ubuntu
-FROM mcr.microsoft.com/playwright/python:v1.50.0-jammy
+FROM mcr.microsoft.com/playwright/python:v1.50.0-noble
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install langchain-openai==0.3.1 python-dotenv==1.0.1 playwright==1.50.0 langchain==0.3.21 openai==1.65.4 opencv-python==4.11.0.86 pillow==11.1.0 numpy==2.2.4 pyautogui==0.9.54 psutil==7.0.0 fastapi==0.109.2 uvicorn==0.27.0.post1 python-multipart==0.0.9 pydantic==2.10.6 langchain_anthropic==0.3.3 MainContentExtractor==0.0.4 typing-extensions==4.12.2 browser-use==0.1.40
+RUN pip install -r requirements.txt
 
-# Install Node.js and npm
-RUN apt-get update && apt-get install -y \
-    curl \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Playwright browsers
-RUN npm install -g playwright@1.48.2
+# Create startup script
+RUN echo '#!/bin/bash\nplaywright install\npython index.py' > start.sh && \
+    chmod +x start.sh
 
 COPY index.py .
-CMD ["python", "index.py"]
+CMD ["./start.sh"]
